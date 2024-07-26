@@ -18,8 +18,9 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import "./App.css";
-import Datalist from "./components/data";
-import { data as initialData } from "./components/data";
+import Userslist from "./components/Userslist";
+import { UserData } from "./UserData";
+
 const { Header, Content, Sider } = Layout;
 const { Search } = Input;
 
@@ -32,22 +33,22 @@ function getItem(label, key, children, className) {
   };
 }
 
-const uniqueFullname = [...new Set(initialData.map((item) => item.name))].map(
+const uniqueFullname = [...new Set(UserData.map((item) => item.name))].map(
   (Fullname) => ({ value: Fullname, label: Fullname })
 );
-const uniqueUsername = [
-  ...new Set(initialData.map((item) => item.UserName)),
-].map((UserName) => ({ value: UserName, label: UserName }));
+const uniqueUsername = [...new Set(UserData.map((item) => item.UserName))].map(
+  (UserName) => ({ value: UserName, label: UserName })
+);
 
-const uniqueGroups = [...new Set(initialData.map((item) => item.Group))].map(
+const uniqueGroups = [...new Set(UserData.map((item) => item.Group))].map(
   (group) => ({ value: group, label: group })
 );
 
-const uniqueStatuses = [...new Set(initialData.map((item) => item.Status))].map(
+const uniqueStatuses = [...new Set(UserData.map((item) => item.Status))].map(
   (status) => ({ value: status, label: status })
 );
 
-const uniqueData = [...new Set(initialData.map((item) => item.Creaton))].map(
+const uniqueData = [...new Set(UserData.map((item) => item.Creaton))].map(
   (Creaton) => ({ value: Creaton, label: Creaton })
 );
 
@@ -55,7 +56,7 @@ const App = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKey, setSelectedKey] = useState("3");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState(UserData);
   const [form] = Form.useForm();
 
   const {
@@ -64,6 +65,34 @@ const App = () => {
 
   const handleClick = (e) => {
     setSelectedKey(e.key);
+  };
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = (values) => {
+    const newUser = {
+      key: (data.length + 1).toString(),
+      name: values.name,
+      UserName: values.name.toLowerCase().replace(" ", "."),
+      EmailAddress: values.email,
+      Group: values.group[0],
+      Status: values.status[0],
+      Creaton: new Date().toLocaleDateString(),
+    };
+    setData((prevData) => [...prevData, newUser]);
+    form.resetFields();
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setIsModalVisible(false);
+  };
+
+  const handleReset = () => {
+    form.resetFields();
   };
 
   const items = [
@@ -152,34 +181,6 @@ const App = () => {
       selectedKey === "15" ? "custom-selected" : ""
     ),
   ];
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleOk = (values) => {
-    const newUser = {
-      key: (data.length + 1).toString(),
-      name: values.name,
-      UserName: values.name.toLowerCase().replace(" ", "."),
-      EmailAddress: values.email,
-      Group: values.group[0],
-      Status: values.status[0],
-      Creaton: new Date().toLocaleDateString(),
-    };
-    setData([...data, newUser]);
-    form.resetFields();
-    setIsModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    form.resetFields();
-    setIsModalVisible(false);
-  };
-
-  const handleReset = () => {
-    form.resetFields();
-  };
 
   return (
     <Layout hasSider>
@@ -316,7 +317,7 @@ const App = () => {
               All Filter
             </Button>
             <div style={{ width: "100%" }}>
-              <Datalist data={data} />
+              <Userslist list={data} />
             </div>
           </div>
         </Content>
@@ -366,7 +367,7 @@ const App = () => {
             label="User Name"
             rules={[{ required: true, message: "Enter User Name" }]}
           >
-            <Input placeholder="Enter full name" />
+            <Input placeholder="Enter user name" />
           </Form.Item>
           <Form.Item
             name="email"

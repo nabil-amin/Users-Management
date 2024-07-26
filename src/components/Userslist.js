@@ -1,85 +1,11 @@
-import React, { useState } from "react";
-import { Button, Table } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Table, Modal, Form, Input, Select, DatePicker } from "antd";
 import { GoPencil } from "react-icons/go";
 import { MdDoDisturb } from "react-icons/md";
 import { FaUnlockAlt } from "react-icons/fa";
 import { TbDotsVertical } from "react-icons/tb";
 import { ImDownload3 } from "react-icons/im";
-
-export const data = [
-  {
-    key: "1",
-    name: "Ramy Mohsen",
-    UserName: "ramy.mohsen",
-    EmailAddress: "ramy.mohsen@gogle.com",
-    Group: "Office",
-    Status: "Locked",
-    Creaton: "Dec 10,2022",
-  },
-  {
-    key: "2",
-    name: "Hisham Hagag",
-    UserName: "hisham.hagag",
-    EmailAddress: "hisham.hagag@like.com",
-    Group: "Managers",
-    Status: "Inactive",
-    Creaton: "Oct 22,2018",
-  },
-  {
-    key: "3",
-    name: "Khaled Adam",
-    UserName: "khaled.adam",
-    EmailAddress: "khaled.adam@like.com",
-    Group: "Office",
-    Status: "Active",
-    Creaton: "Oct 15,2018",
-  },
-  {
-    key: "4",
-    name: "كريم فاروق",
-    UserName: "kareem.farouk",
-    EmailAddress: "kareem.farouk@nuvb.net",
-    Group: "Office",
-    Status: "Active",
-    Creaton: "Jun 17,2022",
-  },
-  {
-    key: "5",
-    name: "Nour Hamdy",
-    UserName: "nour.hamdy",
-    EmailAddress: "nour.hamdy@lisi.com",
-    Group: "Managers",
-    Status: "Active",
-    Creaton: "Sep 9,2019",
-  },
-  {
-    key: "6",
-    name: "حنان فوزي",
-    UserName: "hanan.fawzy",
-    EmailAddress: "hanan.fawzy@buno.net",
-    Group: "Head Office",
-    Status: "Active",
-    Creaton: "Sep 21,2022",
-  },
-  {
-    key: "7",
-    name: "ايمان ادم",
-    UserName: "iman.adam",
-    EmailAddress: "iman.adam@fadok.net",
-    Group: "Office",
-    Status: "Active",
-    Creaton: "Dec 27,2022",
-  },
-  {
-    key: "8",
-    name: "Mayar Farouq",
-    UserName: "mayar.farouq",
-    EmailAddress: "mayar.farouq@share.net",
-    Group: "Head Office",
-    Status: "Active",
-    Creaton: "Feb 14,2022",
-  },
-];
+import moment from "moment";
 
 const columns = [
   {
@@ -137,9 +63,17 @@ const styles = {
   },
 };
 
-const Datalist = ({ data }) => {
+const Userslist = ({ list }) => {
+  const [data, setData] = useState(list);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    setData(list);
+  }, [list]);
 
   const start = () => {
     setLoading(true);
@@ -149,9 +83,48 @@ const Datalist = ({ data }) => {
     }, 1000);
   };
 
-  const onSelectChange = (newSelectedRowKeys) => {
-    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
+  const onSelectChange = (newSelectedRowKeys, selectedRows) => {
     setSelectedRowKeys(newSelectedRowKeys);
+    if (selectedRows.length > 0) {
+      setSelectedData(selectedRows[0]);
+    } else {
+      setSelectedData(null);
+    }
+  };
+
+  const handleOpenModal = () => {
+    form.setFieldsValue({
+      ...selectedData,
+      Creaton: moment(selectedData.Creaton, "MMM DD,YYYY"),
+    });
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        const updatedData = data.map((item) =>
+          item.key === selectedData.key
+            ? {
+                ...item,
+                ...values,
+                Creaton: values.Creaton.format("MMM DD,YYYY"),
+              }
+            : item
+        );
+        setData(updatedData);
+        setIsModalVisible(false);
+        setSelectedData(null);
+        setSelectedRowKeys([]);
+      })
+      .catch((info) => {
+        console.log("Validate Failed:", info);
+      });
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
   };
 
   const rowSelection = {
@@ -175,7 +148,7 @@ const Datalist = ({ data }) => {
           {hasSelected ? `${selectedRowKeys.length} selected` : "0 selected"}
           <Button
             type="default"
-            onClick={start}
+            onClick={handleOpenModal}
             disabled={!hasSelected}
             loading={loading}
           >
@@ -240,8 +213,77 @@ const Datalist = ({ data }) => {
         </Button>
       </div>
       <Table rowSelection={rowSelection} columns={columns} dataSource={data} />
+      <Modal
+        title="Edit User"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        okText="Save"
+        cancelText="Cancel"
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          name="edit_user"
+          initialValues={selectedData}
+        >
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: "Please input the name!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="UserName"
+            label="User Name"
+            rules={[{ required: true, message: "Please input the user name!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="EmailAddress"
+            label="Email Address"
+            rules={[
+              { required: true, message: "Please input the email address!" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="Group"
+            label="Group"
+            rules={[{ required: true, message: "Please select the group!" }]}
+          >
+            <Select>
+              <Select.Option value="Office">Office</Select.Option>
+              <Select.Option value="Managers">Managers</Select.Option>
+              <Select.Option value="Head Office">Head Office</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="Status"
+            label="Status"
+            rules={[{ required: true, message: "Please select the status!" }]}
+          >
+            <Select>
+              <Select.Option value="Active">Active</Select.Option>
+              <Select.Option value="Inactive">Inactive</Select.Option>
+              <Select.Option value="Locked">Locked</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="Creaton"
+            label="Created on"
+            rules={[
+              { required: true, message: "Please select the creation date!" },
+            ]}
+          >
+            <DatePicker format="MMM DD,YYYY" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
-
-export default Datalist;
+export default Userslist;
