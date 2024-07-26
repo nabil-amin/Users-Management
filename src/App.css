@@ -1,0 +1,46 @@
+.custom-selected {
+  color: white !important;
+  background-color: rgb(22, 165, 86) !important;
+}
+
+.button {
+  color: rgb(56, 142, 255);
+}
+
+.modal .ant-modal-content {
+  background-color: #f8fafa;
+}
+
+.modal-title-text {
+  font-size: 20px;
+}
+
+.modal-header-title {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  font-weight: bold;
+  background-color: black;
+  padding: 16px;
+  border-radius: 4px;
+  margin: -24px -24px 0;
+}
+
+.ant-modal-header {
+  padding: 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-footer .ant-btn {
+  margin: 0;
+}
